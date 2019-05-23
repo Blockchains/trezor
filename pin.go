@@ -16,16 +16,19 @@
 package trezor
 
 import (
+	"errors"
 	"strings"
 
 	termbox "github.com/nsf/termbox-go"
 )
 
-// DoPin implements Trezor PIN entry with a full-screen terminal-based UI.
-func DoPin(message string) (bool, string, error) {
+var ErrUserCancelledInput = errors.New("user cancelled PIN entry")
+
+// GetPIN implements Trezor PIN entry with a full-screen terminal-based UI.
+func GetPIN(prompt string) (string, error) {
 	err := termbox.Init()
 	if err != nil {
-		return false, "", err
+		return "", err
 	}
 	defer termbox.Close()
 
@@ -64,7 +67,7 @@ func DoPin(message string) (bool, string, error) {
 		{
 			termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 
-			printStr(0, 0, message)
+			printStr(0, 0, prompt)
 
 			printStr(3, 2, "●●●")
 			printStr(3, 3, "●●●")
@@ -90,7 +93,7 @@ func DoPin(message string) (bool, string, error) {
 			}
 
 			if event.Ch == 'q' || event.Key == termbox.KeyCtrlC {
-				return false, "", nil
+				return "", ErrUserCancelledInput
 			}
 
 			switch event.Key {
@@ -109,7 +112,7 @@ func DoPin(message string) (bool, string, error) {
 					pin = pin[:len(pin)-1]
 				}
 			case termbox.KeyEnter:
-				return true, pin, nil
+				return pin, nil
 			}
 
 			cursorY = clamp(cursorY, 0, 2)
