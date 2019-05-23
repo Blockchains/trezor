@@ -1,4 +1,4 @@
-module github.com/reserve-protocol/trezor-pin
+module github.com/reserve-protocol/trezor
 
 go 1.12
 
